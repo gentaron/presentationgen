@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Presentation, Template, Slide } from './types';
 import Header from './components/Header';
@@ -60,7 +60,7 @@ function App() {
           currentStep={currentStep}
           onNewPresentation={handleNewPresentation}
           onExport={handleExport}
-          canExport={presentation && presentation.slides.length > 0}
+          canExport={!!(presentation && presentation.slides.length > 0)}
         />
 
         <main className="container mx-auto px-4 py-8">

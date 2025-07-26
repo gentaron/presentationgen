@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Presentation, Template, Slide, SlideElement } from '../types';
 import { Plus, Type, Image, BarChart3, Square, Trash2, Copy, Move } from 'lucide-react';
 
@@ -152,7 +152,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({
               <div className="absolute inset-2 bg-white rounded text-xs text-gray-800 p-1">
                 <div className="text-center font-medium truncate">Slide {index + 1}</div>
                 <div className="space-y-1 mt-1">
-                  {slide.elements.slice(0, 3).map((element, i) => (
+                  {slide.elements.slice(0, 3).map((_, i) => (
                     <div
                       key={i}
                       className="h-1 bg-gray-300 rounded"
