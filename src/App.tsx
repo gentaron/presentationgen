@@ -8,6 +8,8 @@ import PreviewPanel from './components/PreviewPanel';
 import ExportPanel from './components/ExportPanel';
 import { CreativeBrief, parseCreativeBrief, slidesFromBrief } from './utils/creativeBrief';
 
+const sharedBriefUrl = 'https://raw.githubusercontent.com/gentaron/VAIZ/main/briefs/from-infocollect.json';
+
 function App() {
   const [currentStep, setCurrentStep] = useState<'template' | 'edit' | 'export'>('template');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -26,6 +28,19 @@ function App() {
     } catch (error) {
       setPendingBrief(null);
       setBriefError(error instanceof Error ? error.message : 'JSONを読み込めませんでした');
+    }
+  };
+
+  const handleSharedBrief = async () => {
+    try {
+      const response = await fetch(sharedBriefUrl, { signal: AbortSignal.timeout(8_000) });
+      if (!response.ok) throw new Error(`公開企画を取得できませんでした（HTTP ${response.status}）`);
+      const brief = parseCreativeBrief(await response.json());
+      setPendingBrief(brief);
+      setBriefError(null);
+    } catch (error) {
+      setPendingBrief(null);
+      setBriefError(error instanceof Error ? error.message : '公開企画を読み込めませんでした');
     }
   };
 
@@ -102,6 +117,13 @@ function App() {
                     onChange={(event) => void handleBriefFile(event.target.files?.[0])}
                     className="block w-full text-sm text-gray-300"
                   />
+                  <button
+                    type="button"
+                    onClick={() => void handleSharedBrief()}
+                    className="mt-3 rounded-lg bg-purple-500 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-400"
+                  >
+                    InfoCollectの公開企画を読み込む
+                  </button>
                   <p aria-live="polite" className={briefError ? 'text-red-300 mt-2' : 'text-gray-300 mt-2'}>
                     {briefError || (pendingBrief ? `読み込み済み: ${pendingBrief.title}。テンプレートを選ぶと編集可能な下書きを作ります。` : 'JSONがなくても通常どおり作成できます。')}
                   </p>
