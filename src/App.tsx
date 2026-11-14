@@ -6,20 +6,36 @@ import TemplateSelector from './components/TemplateSelector';
 import SlideEditor from './components/SlideEditor';
 import PreviewPanel from './components/PreviewPanel';
 import ExportPanel from './components/ExportPanel';
+import { CreativeBrief, parseCreativeBrief, slidesFromBrief } from './utils/creativeBrief';
 
 function App() {
   const [currentStep, setCurrentStep] = useState<'template' | 'edit' | 'export'>('template');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [pendingBrief, setPendingBrief] = useState<CreativeBrief | null>(null);
+  const [briefError, setBriefError] = useState<string | null>(null);
+
+  const handleBriefFile = async (file?: File) => {
+    if (!file) return;
+    try {
+      if (file.size > 1_000_000) throw new Error('ファイルは1MB以下にしてください');
+      const brief = parseCreativeBrief(JSON.parse(await file.text()));
+      setPendingBrief(brief);
+      setBriefError(null);
+    } catch (error) {
+      setPendingBrief(null);
+      setBriefError(error instanceof Error ? error.message : 'JSONを読み込めませんでした');
+    }
+  };
 
   const handleTemplateSelect = (template: Template) => {
     setSelectedTemplate(template);
     const newPresentation: Presentation = {
       id: Date.now().toString(),
-      title: 'New Presentation',
+      title: pendingBrief?.title || 'New Presentation',
       templateId: template.id,
-      slides: [],
+      slides: pendingBrief ? slidesFromBrief(pendingBrief, template) : [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -49,6 +65,8 @@ function App() {
     setCurrentStep('template');
     setSelectedTemplate(null);
     setPresentation(null);
+    setPendingBrief(null);
+    setBriefError(null);
   };
 
   return (
@@ -73,6 +91,21 @@ function App() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
+                <div className="glass rounded-xl p-5 mb-8 max-w-3xl mx-auto">
+                  <label htmlFor="creative-brief-file" className="block text-white font-semibold mb-2">
+                    InfoCollectの企画JSONを読み込む（任意）
+                  </label>
+                  <input
+                    id="creative-brief-file"
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={(event) => void handleBriefFile(event.target.files?.[0])}
+                    className="block w-full text-sm text-gray-300"
+                  />
+                  <p aria-live="polite" className={briefError ? 'text-red-300 mt-2' : 'text-gray-300 mt-2'}>
+                    {briefError || (pendingBrief ? `読み込み済み: ${pendingBrief.title}。テンプレートを選ぶと編集可能な下書きを作ります。` : 'JSONがなくても通常どおり作成できます。')}
+                  </p>
+                </div>
                 <TemplateSelector onTemplateSelect={handleTemplateSelect} />
               </motion.div>
             )}
