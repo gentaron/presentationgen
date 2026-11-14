@@ -165,3 +165,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ---
 
 Built with ❤️ using React, TypeScript, and modern web technologies.
+
+## InfoCollectの企画JSONから始める
+
+InfoCollectの`creative-brief` JSONを保存し、最初のテンプレート選択画面で読み込めます。テンプレートを選ぶと、タイトル・背景・出典・要点を入れた編集可能なスライド下書きが作られます。JSONを読み込まない場合は通常どおり空のプレゼンテーションを作れます。
+
+入力は`schemaVersion: 1`、`type: "creative-brief"`、`brief.title`、`brief.context`、HTTPSの`source.url`を必要とします。`brief.goal`、`brief.audience`、`brief.keyPoints`は編集用の任意項目です。ファイルはブラウザ内で読み込み、外部サービスへ送信しません。書き出しコマンドと形式は[InfoCollectの仕様](https://github.com/gentaron/infocollect/blob/HEAD/docs/BRIEF.md)を参照してください。
